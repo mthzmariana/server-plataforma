@@ -127,13 +127,43 @@ app.put("/editar-calificaciones/:id", async (req, res) => {
     }
 });
 
-// Tura DELETE de calificaciones
+// Ruta DELETE de calificaciones
 app.delete("/eliminar-calificaciones/:id", async (req, res) => {
     try {
         await Calificacion.findByIdAndDelete(req.params.id);
         res.json({ message: "Calificación eliminada exitosamente" });
     } catch (error) {
         console.error("Error al eliminar calificación:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+// Ruta POST registro de usuario
+app.post("/register", async (req, res) => {
+    try {
+        const { name, email, password, edad } = req.body;
+        const newUser = new Usuario({ name, email, password, edad });
+        await newUser.save();
+        res.status(201).json({ message: "Usuario registrado exitosamente" });
+    } catch (error) {
+        console.error("Error al registrar usuario:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+//Ruta para verificación de inicio de sesión
+app.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await Usuario.findOne({ email });
+
+        if (user && user.password === password) {
+            res.status(200).json({ message: "Inicio de sesión exitoso", user });
+        } else {
+            res.status(401).json({ error: "Credenciales inválidas" });
+        }
+    } catch (error) {
+        console.error("Error al intentar iniciar sesión:", error);
         res.status(500).json({ error: "Error interno del servidor" });
     }
 });
